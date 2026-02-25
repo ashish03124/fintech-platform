@@ -1,0 +1,19 @@
+# kafka/schemas/transaction.avsc
+{
+  "type": "record",
+  "name": "Transaction",
+  "namespace": "com.fintech",
+  "fields": [
+    {"name": "transaction_id", "type": "string"},
+    {"name": "user_id", "type": "string"},
+    {"name": "amount", "type": "double"},
+    {"name": "currency", "type": "string"},
+    {"name": "merchant", "type": ["null", "string"], "default": null},
+    {"name": "category", "type": {"type": "enum", "name": "Category", "symbols": ["FOOD", "TRANSPORT", "SHOPPING", "BILLS", "ENTERTAINMENT", "OTHER"]}},
+    {"name": "timestamp", "type": {"type": "long", "logicalType": "timestamp-millis"}},
+    {"name": "location", "type": ["null", "string"], "default": null},
+    {"name": "device_id", "type": ["null", "string"], "default": null},
+    {"name": "ip_address", "type": ["null", "string"], "default": null},
+    {"name": "status", "type": {"type": "enum", "name": "Status", "symbols": ["PENDING", "COMPLETED", "FAILED", "FRAUD"]}, "default": "PENDING"}
+  ]
+}

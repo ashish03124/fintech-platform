@@ -1,0 +1,39 @@
+# monitoring/alerts/alert_rules.yml
+groups:
+  - name: fintech_alerts
+    rules:
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value }} for service {{ $labels.service }}"
+      
+      - alert: HighTransactionLatency
+        expr: histogram_quantile(0.95, rate(transaction_processing_latency_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High transaction processing latency"
+          description: "95th percentile latency is {{ $value }} seconds"
+      
+      - alert: KafkaLagHigh
+        expr: sum by (topic) (kafka_consumer_lag) > 1000
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High Kafka consumer lag"
+          description: "Consumer lag for {{ $labels.topic }} is {{ $value }}"
+      
+      - alert: AIServiceDown
+        expr: up{job="ai-service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "AI Service is down"
+          description: "AI service has been down for more than 1 minute"

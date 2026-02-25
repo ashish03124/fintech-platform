@@ -1,0 +1,69 @@
+# monitoring/alerts/business_rules.yml
+groups:
+  - name: business_metrics
+    rules:
+      - alert: HighTransactionVolume
+        expr: rate(transactions_processed_total[5m]) > 1000
+        for: 5m
+        labels:
+          severity: warning
+          team: operations
+        annotations:
+          summary: "High transaction volume detected"
+          description: "Transaction rate is {{ $value }} per second"
+          runbook: "https://wiki.example.com/runbooks/high-transaction-volume"
+          
+      - alert: HighFraudRate
+        expr: rate(fraud_detection_alerts_total[1h]) / rate(transactions_processed_total[1h]) > 0.01
+        for: 15m
+        labels:
+          severity: critical
+          team: security
+        annotations:
+          summary: "High fraud detection rate"
+          description: "Fraud rate is {{ $value | humanizePercentage }}"
+          runbook: "https://wiki.example.com/runbooks/high-fraud-rate"
+          
+      - alert: SlowAIResponse
+        expr: histogram_quantile(0.95, rate(ai_response_time_seconds_bucket[5m])) > 5
+        for: 10m
+        labels:
+          severity: warning
+          team: ai
+        annotations:
+          summary: "Slow AI response times"
+          description: "95th percentile response time is {{ $value }} seconds"
+          runbook: "https://wiki.example.com/runbooks/slow-ai-response"
+          
+      - alert: HighErrorRate
+        expr: rate(http_request_errors_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "High error rate on API"
+          description: "Error rate is {{ $value | humanizePercentage }}"
+          runbook: "https://wiki.example.com/runbooks/high-error-rate"
+          
+      - alert: KafkaLag
+        expr: avg(kafka_consumer_lag) by (consumer_group) > 1000
+        for: 10m
+        labels:
+          severity: warning
+          team: data
+        annotations:
+          summary: "High Kafka consumer lag"
+          description: "Consumer group {{ $labels.consumer_group }} has lag of {{ $value }} messages"
+          runbook: "https://wiki.example.com/runbooks/kafka-lag"
+          
+      - alert: LowCashReserve
+        expr: avg(account_balance{account_type="CHECKING"}) by (user_id) < 1000
+        for: 1h
+        labels:
+          severity: warning
+          team: risk
+        annotations:
+          summary: "Low cash reserve detected"
+          description: "User {{ $labels.user_id }} has low cash reserves"
+          runbook: "https://wiki.example.com/runbooks/low-cash-reserve"
